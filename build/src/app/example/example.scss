@@ -1,0 +1,25 @@
+table {
+	width: 100%;
+
+	th, td {
+		text-align: left;
+	}
+}
+
+.half-container::after {
+	content: '';
+	display: block;
+	clear: both;
+}
+
+.half-left, .half-right {
+	width: 50%;
+}
+
+.half-left {
+	float: left;
+}
+
+.half-right {
+	float: right;
+}

@@ -1,0 +1,218 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>aac-api</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+
+        <link rel="stylesheet" href="dist/vendor.min.css">
+
+        <link rel="stylesheet" href="dist/style.min.css">
+    </head>
+    <body>
+
+        <!-- This file should represent how someone can use your component. So which scripts to ref and what html is needed. -->
+        <!-- Note that the final version of this will be in the build folder after you run: $ gulp build -->
+        <section class="aw-webapp">
+            <header>
+                <h1>AAC API</h1>
+            </header>
+            <section>
+                <header>
+                    <h3>Provider Config</h3>
+                </header>
+                <section>
+                    <h4>Provider</h4>
+                    <p>The Api service can be configured by using the provider. This needs to happen in the config phase of the module in which you want to use this service.</p>
+                    <p>Example</p>
+                    <pre>
+                        angular
+                            .module( 'example.json' )
+                            .config( config )
+                        ;
+
+                        // @ngInject
+                        function config( ApiProvider ) {
+                            ApiProvider.setConfig('protocol', 'https://');
+                            ApiProvider.setConfig('baseUrl', 'api.com/api.php');
+                        }
+                    </pre>
+                </section>
+                <section>
+                    <h4>Available Options</h4>
+                    <p>These are the options you can set during the configuration phase</p>
+
+                    <table>
+                        <tr>
+                            <th>Option</th>
+                            <th>Type</th> 
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>debug</td>
+                            <td>Boolean</td> 
+                            <td>false</td>
+                            <td>Setting this flag to true will enable logging of all api calls</td>
+                        </tr>
+                        <tr>
+                            <td>protocol</td>
+                            <td>String</td>
+                            <td>''</td>
+                            <td>Allows you to set the protocol. Examples: 'https://', 'http://', 'ftp://', 'file://'</td>
+                        </tr>
+                        <tr>
+                            <td>baseUri</td>
+                            <td>String</td>
+                            <td>'api/'</td>
+                            <td>The base Uri of the api. Example: 'api.com/api.php'</td>
+                        </tr>
+                        <tr>
+                            <td>defaultHttpMethod</td>
+                            <td>String</td>
+                            <td>'GET'</td>
+                            <td>The default http method off all calls. You can set this per API call by passing in the <pre>method</pre> option</td>
+                        </tr>
+                        <tr>
+                            <td>parseArrayAsJson</td>
+                            <td>Boolean</td>
+                            <td>false</td>
+                            <td>In case we need to give mixed content types. This options will parse arrays as Json inside a form-url-encoded data object.</td>
+                        </tr>
+                    </table>
+                </section>
+            </section>
+            <section>
+                <header>
+                    <h3>Api.call</h3>
+                </header>
+                <section>
+                    <h4>Description</h4>
+                    <p>This is the only public function of this service. It allows you to do any pink of http call to different end points</p>
+                    <h4>Example</h4>
+                    <pre>
+Api.call( {
+    data: {
+        c: 'funkyFunction'
+    },
+    resolve: function( response ) {
+        console.log( response.data );
+    }
+} );  
+                    </pre>
+                    <h4>Params</h4>
+                        <table>
+                            <tr>
+                                <th>Option</th>
+                                <th>Type</th> 
+                                <th>Default</th>
+                                <th>Description</th>
+                            </tr>
+                            <tr>
+                                <td>url</td>
+                                <td>String</td> 
+                                <td>service.baseUrl + params.url</td>
+                                <td>Will add this url to the base url which is set in the config phase through config.protocol and config.baseUri</td>
+                            </tr>
+                            <tr>
+                                <td>method</td>
+                                <td>String</td> 
+                                <td>config.defaultHttpMethod</td>
+                                <td>Sets http method for this call. Examples: 'POST', 'GET', 'PUT', 'DELETE'</td>
+                            </tr>
+                            <tr>
+                                <td>data</td>
+                                <td>Object</td> 
+                                <td>undefined</td>
+                                <td>The data that you can send with a POST or PUT request</td>
+                            </tr>
+                            <tr>
+                                <td>resolve</td>
+                                <td>Function</td> 
+                                <td>angular.noop</td>
+                                <td>This function will be called once the call resolves. It will return http.response.</td>
+                            </tr>
+                            <tr>
+                                <td>reject</td>
+                                <td>Function</td> 
+                                <td>service.reject</td>
+                                <td>This function will be called if the call gets rejected. It will return http.response.</td>
+                            </tr>
+                        </table>
+                </section>
+            </section>
+            <section ng-app="example.json">
+                <header><h3>Loading JSON</h3></header>
+                <section class="half-container" ng-controller="JsonController as JsonCtrl">
+                    <div class="half-left">
+                        <p>Get a local json file.</p>
+                        <button ng-click="JsonCtrl.get()">Get it</button> 
+                        <p>Example Code</p>
+                        <strong>Config</strong>
+                        <pre>
+function config( ApiProvider ) {
+    ApiProvider.setConfig('baseUri', 'app/example/json/');
+}
+                        </pre>
+                        <strong>Controller/Service</strong>
+                        <pre>
+Api.call( {
+    url: 'json.json',
+    resolve: gotJson
+} );
+                        </pre>
+                    </div>
+                    <div class="half-right">
+                        <pre>
+{{JsonCtrl.result | json}}
+                        </pre>
+                    </div>
+                </section>
+            </section>
+            <section ng-app="example.api" id="api">
+                <header><h3>Calling an API</h3></header>
+                <section class="half-container" ng-controller="ApiController as ApiCtrl">
+                    <div class="half-left">
+                        <button ng-click="ApiCtrl.call()">Call it</button> 
+                        <p>Example Code</p>
+                        <strong>Config</strong>
+                        <pre>
+angular
+    .module( 'example.api' )
+    .config( config )
+;
+
+// @ngInject
+function config( ApiProvider ) {
+    ApiProvider.setConfig('protocol', 'http://');
+    ApiProvider.setConfig('baseUri', 'jsonplaceholder.typicode.com');
+    ApiProvider.setConfig('defaultHttpMethod', 'GET');
+}
+                        </pre>
+                        <strong>Controller/Service</strong>
+                        <pre>
+Api.call( {
+    url: '/posts/1',
+    resolve: gotApiResult
+} );                        
+                        </pre>
+                    </div>
+                    <div class="half-right">
+                        <h4>Result</h4>
+                        <pre>
+{{ApiCtrl.result | json}}
+                        </pre>
+                    </div>
+                </section>
+            </section>
+        </section>
+
+
+        <script src="dist/vendor.min.js"></script>
+
+        <script src="dist/app.min.js"></script>
+        <script>angular.bootstrap(document.getElementById("api"), ['example.api']);</script>
+
+    </body>
+</html>
