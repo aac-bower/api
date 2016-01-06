@@ -1,0 +1,21 @@
+{
+	"id": 101,
+	"name": "Record name",
+	"data": {
+		"propertyOne": "propertyOneValue"
+	},
+	"links": [
+		{
+			"href": "foo.com/bar",
+			"text": "foo"
+		},
+		{
+			"href": "bar.com",
+			"text": "bar"
+		},
+		{
+			"href": "foobar.com/zoo",
+			"text": "foobar"
+		}
+	]
+}
