@@ -222,17 +222,15 @@ Api.call( {
         <!-- endbuild -->
 
         <!-- build:js dist/app.min.js -->
-        <!-- inject:js -->
         <script src="app/index.module.js"></script>
+        <script src="app/index.provider.js"></script>
+        <!-- endbuild -->
         <script src="app/example/api/api.module.js"></script>
         <script src="app/example/json/json.module.js"></script>
-        <script src="app/index.provider.js"></script>
         <script src="app/example/api/api.config.js"></script>
         <script src="app/example/api/api.controller.js"></script>
         <script src="app/example/json/json.config.js"></script>
         <script src="app/example/json/json.controller.js"></script>
-        <!-- endinject -->
-        <!-- endbuild -->
         <script>angular.bootstrap(document.getElementById("api"), ['example.api']);</script>
 
     </body>
