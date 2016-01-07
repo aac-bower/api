@@ -14,7 +14,7 @@
         var vm = this;
 
         vm.return2 = function() {
-            return 2;
+            return 3;
         };
     }
 })();
