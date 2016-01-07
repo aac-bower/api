@@ -28,6 +28,7 @@ module.exports = function (gulp, plugin, config) {
         return inject(
             config.client.path.indexHtml,
             [
+                '!./src/app/**/*.spec.js',        // first all the module definitions
                 './src/app/**/*.module.js',        // first all the module definitions
                 './src/app/**/*.!(module).js',     // after that all the module components
                 './src/app/**/*.js'                // after that all non-module files

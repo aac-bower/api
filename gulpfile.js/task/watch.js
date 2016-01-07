@@ -19,11 +19,13 @@ module.exports = function( gulp, plugin, config ) {
             switch( e.extname ) {
                 case '.scss': config.task.sass(); break;
                 case '.json': config.task.wiredep(); break;
-                case '.html': case '.js': 
-                    // to give time to to the inject task to complete. Task takes an AVG of 41ms on my machine. So 4x as slow is still ok.
-                    setTimeout( function() {
-                        plugin.browserSync.reload(); 
-                    }, reloadDelay );
+                case '.js': 
+                    config.task.test();
+                case '.html': 
+                        // to give time to to the inject task to complete. Task takes an AVG of 41ms on my machine. So 4x as slow is still ok.
+                        setTimeout( function() {
+                            plugin.browserSync.reload(); 
+                        }, reloadDelay );
                 break;
             }
         } );

@@ -34,6 +34,7 @@ var plugin = {
     watch:             require('gulp-watch'),
     sass:              require('gulp-sass'),
     if:                require('gulp-if'),
+    karma:             require('karma'),
     path:              require('path'),
     del:               require('del')
 };
@@ -50,11 +51,13 @@ gulp.task( 'inject',  config.task.inject  );
 gulp.task( 'wiredep', config.task.wiredep );
 gulp.task( 'sass',    config.task.sass    );
 gulp.task( 'font',    config.task.font    );
+gulp.task( 'testServer',    config.task.testServer    );
+// gulp.task( 'watch',    config.task.watch    );
 
 gulp.task( 'serve', ['inject', 'sass'], config.task.serve );
 gulp.task( 
     'default', 
-    gulpsync.sync( ['wiredep', 'font',  'serve'] ), 
+    gulpsync.sync( ['wiredep', 'font',  'serve', 'testServer'] ), 
     config.task.watch 
 );
 

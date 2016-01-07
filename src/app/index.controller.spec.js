@@ -1,4 +1,4 @@
-describe('Testing the Api Controller', function(){
+describe( 'Api Controller |', function(){
     var mockDataSvc, rootScope, scope, passPromise, firstController, apiController;
 
     beforeEach(function() {
@@ -11,8 +11,21 @@ describe('Testing the Api Controller', function(){
       });
     }));
 
-    it('should have set pattern to match numbers', function(){
-        expect(apiController.return2).toBeDefined();
-        expect(apiController.return2()).toBe(2);
-    });
+    describe( 'vm.return2()', function() {
+        it('will return 2', function(){
+            expect(apiController.return2).toBeDefined();
+            expect(apiController.return2()).toBe(2);
+        });
+
+        it('function return2 will return 2', function(){
+            expect(apiController.return2).toBeDefined();
+            expect(apiController.return2()).toBe(2);
+        });
+
+        it('should fail if we expect 3', function(){
+            expect(apiController.return2).toBeDefined();
+            expect(apiController.return2()).not.toBe(3);
+        });
+    } );
+
 });

@@ -41,7 +41,8 @@ module.exports = function( gulp, plugin ) {
                 indexHtml:  clientSrc + '/index.html',
                 styleScss:  clientSrc + '/index.style.scss',
                 vendorScss: clientSrc + '/index.vendor.scss',
-                bower:      root + 'bower.json'
+                bower:      root + 'bower.json',
+                karmaConfig: __dirname.replace('gulpfile.js', 'karma.conf.js')
             },
             glob: {
                 buildDist: root + component.build.root + '/dist/**',
@@ -74,6 +75,8 @@ module.exports = function( gulp, plugin ) {
     config.task = {
         cacheTemplate: getTask('cacheTemplate'),
         clean: getTask('clean'),
+        test: getTask('test'),
+        testServer: getTask('testServer'),
         copy: getTask('copy'),
         font: getTask('font'),
         html: getTask('html'),
