@@ -30,6 +30,7 @@
     "gulp-useref": "^3.0.3",
     "gulp-watch": "^4.3.5",
     "imagemin-pngquant": "^4.2.0",
+<<<<<<< HEAD
     "jasmine-core": "^2.4.1",
     "karma": "^0.13.19",
     "karma-chrome-launcher": "^0.2.2",
@@ -37,6 +38,15 @@
     "karma-jasmine": "~0.3.6",
     "karma-ng-html2js-preprocessor": "~0.2.0",
     "karma-phantomjs-launcher": "~0.2.1",
+=======
+    "jasmine-core": "^2.3.4",
+    "karma": "^0.13.19",
+    "karma-chrome-launcher": "^0.1.12",
+    "karma-coverage": "^0.3.1",
+    "karma-jasmine": "^0.3.5",
+    "karma-ng-html2js-preprocessor": "^0.1.2",
+    "karma-phantomjs-launcher": "^0.2.3",
+>>>>>>> e455fc46c9645383dbb0508e4510ebda639992f2
     "main-bower-files": "^2.11.0",
     "node-notifier": "^4.4.0",
     "path": "^0.12.7",
