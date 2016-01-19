@@ -1,55 +1,70 @@
 module.exports = function(config) {
-  config.set({
 
-    basePath: '',
+  var path = require('path');
+  var wiredep = require('wiredep');
+
+  function getFiles() {
+    var patterns = wiredep( {
+      dependencies: true,
+      devDependencies: true
+    } ).js
+      .concat( [
+        './src/app/**/*.module.js',        // first all the module definitions
+        './src/app/**/*.js',               // after that all other js files
+        './src/app/**/*.html'              // get all the templates to test directives
+    ] );
+
+    var files = patterns.map(function(pattern) {
+      return {
+        pattern: pattern
+      };
+    });
+    files.push({
+      pattern: './src/asset/**/*',
+      included: false,
+      served: true,
+      watched: false
+    });
+    return files;
+  }
+
+
+  config.set( {
+    port: 9876,
+    files: getFiles(),
+    exclude: [],
 
     frameworks: ['jasmine'],
-
-    files: [
-      './bower_components/angular/angular.js',
-      './node_modules/angular-mocks/angular-mocks.js',
-
-                './src/app/**/*.module.js',        // first all the module definitions
-                './src/app/**/*.!(module).js',     // after that all the module components
-                './src/app/**/*.js'                // after that all non-module files
-    ],
-
-    exclude: [
-    ],
-
+    // processing the following files with the listed processors
     preprocessors: {
-      './src/**/*.html': ['ng-html2js'],
-      './src/**/!(*.mock|*.spec).js': ['coverage']
+      './src/**/*.html': ['ng-html2js'],              // creating template cache
+      './src/**/!(*.mock|*.spec).js': ['coverage']    // listing our coverage
     },
 
+    // uses template cache to make the html templates available to test directives
     ngHtml2JsPreprocessor: {
-      // strip this from the file path
       stripPrefix: 'src/',
-      // create a single module that contains templates from all the files
-      moduleName: 'templates'
+      moduleName: 'test.templates'
     },
 
     reporters: ['progress', 'coverage'],
 
     coverageReporter: {
       type : 'html',
-      // output coverage reports
-      dir : 'coverage/'
+      dir : './coverage/'
     },
 
-    port: 9876,
 
     colors: true,
-
-    logLevel: config.LOG_INFO,
-
-    autoWatch: false,
 
     browsers: [
         'PhantomJS'
         // 'Chrome'
     ],
 
-    singleRun: true
+    // makes sure our assets are available
+    proxies: {
+      '/asset': './src/asset'
+    }
   });
 };

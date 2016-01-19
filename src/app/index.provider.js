@@ -37,7 +37,7 @@
              
                 return $http( {
                     method:  _method,
-                    url:     service.baseUrl + (params.url || ''),
+                    url:     (params.baseUrl || service.baseUrl) + (params.url || ''),
                     data:    parse( params.data, _method )
                 } ).then( 
                     params.resolve || angular.noop,

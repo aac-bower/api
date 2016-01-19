@@ -4,20 +4,20 @@
 module.exports = function (gulp, plugin, config) {
 
     return function () {
-        var stream = gulp.src( config.client.path.indexHtml )
+        var stream = gulp.src( config.path.indexHtml )
             .pipe( plugin.useref( {
-               noconcat: !config.component.build.production
+               noconcat: !config.build.production
             } ) )
             .pipe( plugin.if( '*.js', plugin.annotate() ) )
         ;
 
-        if ( config.component.build.production ) {
+        if ( config.build.production ) {
             stream
                 .pipe( plugin.if( '*.js', plugin.uglify() ) )
                 .pipe( plugin.if( '*.css', plugin.cssnano() ) );
         }
 
         return stream
-            .pipe( gulp.dest( config.client.dir.build ) );
+            .pipe( gulp.dest( config.dir.build.root ) );
     };
 };

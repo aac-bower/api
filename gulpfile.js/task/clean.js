@@ -4,6 +4,6 @@
 module.exports = function (gulp, plugin, config) {
 
     return function () {
-        return plugin.del( config.client.dir.build );
+        return plugin.del( config.dir.build.root );
     };
 };

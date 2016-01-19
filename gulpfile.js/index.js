@@ -15,12 +15,14 @@ var plugin = {
     browserSync:       require('browser-sync').create(),
     exec:              require('child_process').exec,
     pngquant:          require('imagemin-pngquant'),
+    autoprefixer:      require('gulp-autoprefixer'),
     mainBowerFiles:    require('main-bower-files'),
     annotate:          require('gulp-ng-annotate'),
     sourcemaps:        require('gulp-sourcemaps'),
     sync:              require('gulp-sync')(gulp),
     wiredep:           require('wiredep').stream,
     imagemin:          require('gulp-imagemin'),
+    notifier:          require('node-notifier'),
     plumber:           require('gulp-plumber'),
     cssnano:           require('gulp-cssnano'),
     replace:           require('gulp-replace'),
@@ -34,7 +36,9 @@ var plugin = {
     watch:             require('gulp-watch'),
     sass:              require('gulp-sass'),
     if:                require('gulp-if'),
+    extend:            require('extend'),
     karma:             require('karma'),
+    glob:              require('glob'),
     path:              require('path'),
     del:               require('del')
 };
@@ -47,17 +51,16 @@ var config   = require('./config.js')( gulp, plugin );
 /* 
     Development
 */
-gulp.task( 'inject',  config.task.inject  );
-gulp.task( 'wiredep', config.task.wiredep );
-gulp.task( 'sass',    config.task.sass    );
-gulp.task( 'font',    config.task.font    );
-gulp.task( 'testServer',    config.task.testServer    );
-// gulp.task( 'watch',    config.task.watch    );
+gulp.task( 'inject',        config.task.inject  );
+gulp.task( 'wiredep',       config.task.wiredep );
+gulp.task( 'sass',          config.task.sass    );
+gulp.task( 'font',          config.task.font    );
+gulp.task( 'test',          config.task.test    );
 
 gulp.task( 'serve', ['inject', 'sass'], config.task.serve );
 gulp.task( 
     'default', 
-    gulpsync.sync( ['wiredep', 'font',  'serve', 'testServer'] ), 
+    gulpsync.sync( ['wiredep', 'font',  'serve'] ), 
     config.task.watch 
 );
 
@@ -90,3 +93,6 @@ gulp.task(
         'serveBuild'
     ] ) 
 );
+
+
+gulp.task( 'serveCoverage',     config.task.serveCoverage );

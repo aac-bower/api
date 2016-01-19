@@ -6,10 +6,10 @@ module.exports = function (gulp, plugin, config) {
 
     return function () {
     	function getTemplateCache() {
-	        return gulp.src( config.client.glob.template )
-	            .pipe( plugin.cache( 'templates.js', {
-			    	transformUrl: function(url) {
-					    return 'app/' + url;
+	        return gulp.src( config.glob.template )
+	            .pipe( plugin.cache( config.build.templatecacheTmpFile, {
+			    	transformUrl: function( url ) {
+					    return config.build.pathCorrection.templatecache.prefix + url;
 					},
                     htmlmin: {
                         collapseBooleanAttributes:      true,
@@ -26,25 +26,27 @@ module.exports = function (gulp, plugin, config) {
     	setTimeout( cacheTemplate, 0 );
 
     	function cacheTemplate() {
-            if ( config.component.build.production ) {
-    	    	return gulp.src( config.client.dir.buildDist + '/' + config.component.name + '.min.js' )
+            if ( config.build.production ) {
+    	    	return gulp.src( config.dir.build.dist + '/' + config.name + '.min.js' )
     	    		// add the templatecache to the stream
-    			    .pipe( plugin.stream.obj( getTemplateCache( ) ) )
+    			    .pipe( plugin.stream.obj( getTemplateCache() ) )
 
-                // Wait... Fixing it twice?    
-    			    // fix asset url
-    			    .pipe( plugin.replace(
-                        'src=\\"/asset/', 'src=\\"' + ( config.component.build.root || '' ) + 'dist/asset/'
+                    // fix paths to images
+                    // .pipe( plugin.replace(
+                    //     config.build.pathCorrection.templatecache.search, 
+                    //     config.build.pathCorrection.templatecache.replace
+                    // ) )
+                    .pipe( plugin.replace(
+                        'src=\\"/asset/', 'src=\\"' + ( config.dir.build.root || '' ) + 'dist/asset/'
                     ) )
                     .pipe( plugin.replace(
                         'asset/image/', 'dist/asset/image/'
                     ) )
-                // should figure this ^ out
 
     			    // concatenate the whole thing
-    			    .pipe( plugin.concat( config.component.name + '.min.js' ) )
+    			    .pipe( plugin.concat( config.name + '.min.js' ) )
     			    // write it to the build
-    			    .pipe( gulp.dest( config.client.dir.buildDist ) );
+    			    .pipe( gulp.dest( config.dir.build.dist ) );
             } else {
                 return true;
             }
