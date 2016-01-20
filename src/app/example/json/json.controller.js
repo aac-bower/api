@@ -10,7 +10,7 @@
         .controller('JsonController', JsonController);
 
     // @ngInject
-    function JsonController( Api ) {
+    function JsonController( api ) {
         var vm = this;
         vm.result = undefined;
 
