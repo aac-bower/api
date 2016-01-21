@@ -1,125 +1,129 @@
-
-
-
+/* global angular */
 /*
    api-service
 */
 
-(function() {
-    'use strict';
+(function () {
+	'use strict';
 
-    angular
-        .module( 'aac.api' )
-        .provider('Api', Api);
+	angular
+		.module('aac.api')
+		.provider('api', api);
 
-    // @ngInject
-    function Api() {
-        var config = {
-            debug: false,
-            protocol: '',
-            baseUri: 'api/',
-            defaultHttpMethod: 'GET',
-            parseArrayAsJson: false
-        };
+	// @ngInject
+	function api() {
+		'ngInject';
 
-        // @ngInject
-        var serviceConstruct = function( $http, $q  ) {
-            var service     = this;
-            service.baseUrl = config.protocol + config.baseUri;
+		var config = {
+			debug: false,
+			protocol: '',
+			baseUri: 'api/',
+			defaultHttpMethod: 'GET',
+			parseArrayAsJson: false
+		};
 
+		var serviceConstruct = function ($http) {
+			'ngInject';
 
-            /*
-                Public
-            */
-            service.call = function( params ) {
-                if ( config.debug ) console.log( 'aac.api | service.call()', params );
-                var _method = params.method || config.defaultHttpMethod;
-             
-                return $http( {
-                    method:  _method,
-                    url:     service.baseUrl + (params.url || ''),
-                    data:    parse( params.data, _method )
-                } ).then( 
-                    params.resolve || angular.noop,
-                    params.reject  || reject,
-                    params.notify  || notify
-                );
-            };
+			var service = this;
+			service.baseUrl = config.protocol + config.baseUri;
 
+			/*
+				Public
+			*/
+			service.call = function (params) {
+				if (config.debug) {
+					console.log('aac.api | service.call()', params);
+				}
 
-            /*
-                Private
-            */
-            function reject( response ) {
-                if ( config.debug ) console.log( 'aac.api | service.reject()', response );
-            }
+				var _method = params.method || config.defaultHttpMethod;
 
-            function notify( response ) {
-                if ( config.debug ) console.log( 'aac.api | service.notify()', response );
-            }
+				return $http({
+					method: _method,
+					url: (params.baseUrl || service.baseUrl) + (params.url || ''),
+					data: parse(params.data, _method)
+				}).then(
+					params.resolve || angular.noop,
+					params.reject || reject,
+					params.notify || notify
+				);
+			};
 
-            function parse( data, method ) {
-                var _data;
+			/*
+				Private
+			*/
+			function reject(response) {
+				if (config.debug) {
+					console.log('aac.api | service.reject()', response);
+				}
+			}
 
-                // checks or we have set a content type header for the current method
-                if (  
-                    $http.defaults.headers[ method.toLowerCase() ] &&
-                    $http.defaults.headers[ method.toLowerCase() ]['Content-Type'].match( 'application/x-www-form-urlencoded' ) 
-                ) {
-                    _data = formUrlEncode( data );
-                } else {
-                    _data = JSON.stringify( data );
-                }
+			function notify(response) {
+				if (config.debug) {
+					console.log('aac.api | service.notify()', response);
+				}
+			}
 
-                return _data;
-            }
+			function parse(data, method) {
+				var _data;
 
-            function formUrlEncode(obj) {
-                var query = '', name, value, fullSubName, subName, subValue, innerObj, i;
-                  
-                for( name in obj ) {
-                  value = obj[name];
-                    
-                  if( value instanceof Array ) {
-                    if ( config.parseArrayAsJson ) {
-                        var urlComponent = {};
-                        urlComponent[name] = JSON.stringify( value );
-                        query += formUrlEncode( urlComponent ) + '&';
-                    } else {
-                        for( i = value.length-1; i >= 0; i-- ) {
-                          subValue = value[i];
-                          fullSubName = name + '[' + i + ']';
-                          innerObj = {};
-                          innerObj[fullSubName] = subValue;
-                          query += formUrlEncode( innerObj ) + '&';
-                        }
-                    }
-                  } else if( value instanceof Object ) {
-                    for( subName in value ) {
-                      subValue = value[subName];
-                      fullSubName = name + '[' + subName + ']';
-                      innerObj = {};
-                      innerObj[fullSubName] = subValue;
-                      query += formUrlEncode( innerObj ) + '&';
-                    }
-                  } else if( value !== undefined && value !== null )
-                    query += encodeURIComponent( name ) + '=' + encodeURIComponent( value ) + '&';
-                }
-                  
-                return query.length ? query.substr( 0, query.length - 1 ) : query;
-              };
+				// checks or we have set a content type header for the current method
+				if (
+					$http.defaults.headers[method.toLowerCase()] &&
+					$http.defaults.headers[method.toLowerCase()]['Content-Type'].match('application/x-www-form-urlencoded')
+				) {
+					_data = formUrlEncode(data);
+				} else {
+					_data = JSON.stringify(data);
+				}
 
+				return _data;
+			}
 
-            return service
-        }
+			function formUrlEncode(obj) {
+				var query = '', name, value, fullSubName, subName, subValue, innerObj, i;
 
+				for (name in obj) {
+					value = obj[name];
 
-        return {
-            setConfig: function( key, value ) {
-                config[ key ] = value;
-            },
-            $get: serviceConstruct
-        };
-        
-    }
+					if (value instanceof Array) {
+						if (config.parseArrayAsJson) {
+							var urlComponent = {};
+							urlComponent[name] = JSON.stringify(value);
+							query += formUrlEncode(urlComponent) + '&';
+						} else {
+							for (i = value.length-1; i >= 0; i--) {
+								subValue = value[i];
+								fullSubName = name + '[' + i + ']';
+								innerObj = {};
+								innerObj[fullSubName] = subValue;
+								query += formUrlEncode(innerObj) + '&';
+							}
+						}
+					} else if (value instanceof Object) {
+						for (subName in value) {
+							subValue = value[subName];
+							fullSubName = name + '[' + subName + ']';
+							innerObj = {};
+							innerObj[fullSubName] = subValue;
+							query += formUrlEncode(innerObj) + '&';
+						}
+					} else if (value !== undefined && value !== null) {
+						query += encodeURIComponent(name) + '=' + encodeURIComponent(value) + '&';
+					}
+				}
+
+				return query.length ? query.substr(0, query.length - 1) : query;
+			}
+
+			return service;
+		};
+
+		return {
+			setConfig: function (key, value) {
+				config[key] = value;
+			},
+			$get: serviceConstruct
+		};
+	}
 })();

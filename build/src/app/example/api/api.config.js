@@ -1,25 +1,21 @@
+/* global angular */
 /*
    Config: example.api
 */
 
-(function() {
-    'use strict';
+(function () {
+	'use strict';
 
-    angular
-        .module( 'example.api' )
-        .config( config )
-        .constant( 
-            'CONSTANT_KEY', {
-                
-            }
-        )
-    ;
+	angular
+		.module('example.api')
+		.config(config)
+	;
 
-    // @ngInject
-    function config( ApiProvider ) {
-        ApiProvider.setConfig('protocol', 'http://');
-        ApiProvider.setConfig('baseUri', 'jsonplaceholder.typicode.com');
-        ApiProvider.setConfig('defaultHttpMethod', 'GET');
-    }
-    
+	function config(apiProvider) {
+		'ngInject';
+
+		apiProvider.setConfig('protocol', 'http://');
+		apiProvider.setConfig('baseUri', 'jsonplaceholder.typicode.com');
+		apiProvider.setConfig('defaultHttpMethod', 'GET');
+	}
 })();
