@@ -15,9 +15,9 @@
     ".editorconfig",
     "gulp.config.json",
     "karma.conf.js",
-    "coverage"
+    "coverage",
     "src",
-    "!build/src",
+    "!build/src"
   ],
   "dependencies": {
     "angular": "~1.4.8"
