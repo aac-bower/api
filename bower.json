@@ -6,16 +6,16 @@
     "build/dist/app.min.js"
   ],
   "ignore": [
-    "node_modules",
-    "bower_components",
+    "./node_modules",
+    "./bower_components",
     "*.sublime-project",
     "*.sublime-workspace",
-    "gulpfile.js",
-    "package.json",
-    "src",
-    ".editorconfig",
-    "gulp.config.json",
-    "karma.conf.js",
+    "./gulpfile.js",
+    "./package.json",
+    "./src",
+    "./.editorconfig",
+    "./gulp.config.json",
+    "./karma.conf.js",
     "coverage"
   ],
   "dependencies": {
