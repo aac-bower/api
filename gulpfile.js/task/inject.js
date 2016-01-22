@@ -16,7 +16,7 @@ module.exports = function (gulp, plugin, config) {
         ;
     }
 
-    return function () {
+    return function() {
 
         // inject all scss files in to index.style.scss
         inject(
