@@ -18,11 +18,10 @@
 			debug: false,
 			protocol: '',
 			baseUri: 'api/',
-			defaultHttpMethod: 'GET',
-			parseArrayAsJson: false
+			defaultHttpMethod: 'GET'
 		};
 
-		var serviceConstruct = function ($http) {
+		var serviceConstruct = function ($http, $httpParamSerializerJQLike) {
 			'ngInject';
 
 			var service = this;
@@ -36,13 +35,7 @@
 					console.log('aac.api | service.call()', params);
 				}
 
-				var _method = params.method || config.defaultHttpMethod;
-
-				return $http({
-					method: _method,
-					url: (params.baseUrl || service.baseUrl) + (params.url || ''),
-					data: parse(params.data, _method)
-				}).then(
+				return $http(extendParams(params)).then(
 					params.resolve || angular.noop,
 					params.reject || reject,
 					params.notify || notify
@@ -52,12 +45,23 @@
 			/*
 				Private
 			*/
+			// extinding the params that are send in to use the defaults if they are not set
+			function extendParams(params) {
+				params.method = params.method || config.defaultHttpMethod;
+				params.url = (params.baseUrl || service.baseUrl) + params.url;
+				params.data = parse(params.data, params.method);
+
+				return params;
+			}
+
+			// gets called when we the backend responds something else than a http response in the 2XX
 			function reject(response) {
 				if (config.debug) {
 					console.log('aac.api | service.reject()', response);
 				}
 			}
 
+			// backend can call the notify function in case of file uploads to indicate progress
 			function notify(response) {
 				if (config.debug) {
 					console.log('aac.api | service.notify()', response);
@@ -67,53 +71,16 @@
 			function parse(data, method) {
 				var _data;
 
-				// checks or we have set a content type header for the current method
 				if (
 					$http.defaults.headers[method.toLowerCase()] &&
 					$http.defaults.headers[method.toLowerCase()]['Content-Type'].match('application/x-www-form-urlencoded')
 				) {
-					_data = formUrlEncode(data);
+					_data = $httpParamSerializerJQLike(data);
 				} else {
 					_data = JSON.stringify(data);
 				}
 
 				return _data;
-			}
-
-			function formUrlEncode(obj) {
-				var query = '', name, value, fullSubName, subName, subValue, innerObj, i;
-
-				for (name in obj) {
-					value = obj[name];
-
-					if (value instanceof Array) {
-						if (config.parseArrayAsJson) {
-							var urlComponent = {};
-							urlComponent[name] = JSON.stringify(value);
-							query += formUrlEncode(urlComponent) + '&';
-						} else {
-							for (i = value.length-1; i >= 0; i--) {
-								subValue = value[i];
-								fullSubName = name + '[' + i + ']';
-								innerObj = {};
-								innerObj[fullSubName] = subValue;
-								query += formUrlEncode(innerObj) + '&';
-							}
-						}
-					} else if (value instanceof Object) {
-						for (subName in value) {
-							subValue = value[subName];
-							fullSubName = name + '[' + subName + ']';
-							innerObj = {};
-							innerObj[fullSubName] = subValue;
-							query += formUrlEncode(innerObj) + '&';
-						}
-					} else if (value !== undefined && value !== null) {
-						query += encodeURIComponent(name) + '=' + encodeURIComponent(value) + '&';
-					}
-				}
-
-				return query.length ? query.substr(0, query.length - 1) : query;
 			}
 
 			return service;
