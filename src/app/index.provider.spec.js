@@ -4,7 +4,8 @@
 */
 describe('aac.api | api', function () {
 	var service;
-	var backend;
+	var $httpBackend;
+	var $httpParamSerializerJQLike;
 	var mockController;
 	var mockData;
 	var mockResponse;
@@ -48,9 +49,10 @@ describe('aac.api | api', function () {
 
 	describe('With default configuration', function () {
 		beforeEach(function () {
-			inject(function (api, $httpBackend) {
+			inject(function (api, _$httpBackend_, _$httpParamSerializerJQLike_) {
 				service = api;
-				backend = $httpBackend;
+				$httpBackend = _$httpBackend_;
+				$httpParamSerializerJQLike = _$httpParamSerializerJQLike_;
 			});
 
 			mockController = {
@@ -63,13 +65,13 @@ describe('aac.api | api', function () {
 		});
 
 		afterEach(function () {
-			backend.verifyNoOutstandingExpectation();
-			backend.verifyNoOutstandingRequest();
+			$httpBackend.verifyNoOutstandingExpectation();
+			$httpBackend.verifyNoOutstandingRequest();
 		});
 
-		describe(', api.call', function () {
+		describe('| api.call() |', function () {
 			it('should call an api endpoint and pass data back to the resolve function', function () {
-				backend
+				$httpBackend
 					.when('GET', 'api/model')
 					.respond(mockData);
 
@@ -79,13 +81,13 @@ describe('aac.api | api', function () {
 						mockController.resolve(response.data);
 					}
 				});
-				backend.flush();
+				$httpBackend.flush();
 
 				expect(mockController.resolve).toHaveBeenCalledWith(mockData);
 			});
 
 			it('should handle the rejection of a call', function () {
-				backend
+				$httpBackend
 					.when('GET', 'api/wrongRequest')
 					.respond(404);
 
@@ -93,14 +95,14 @@ describe('aac.api | api', function () {
 					url: 'wrongRequest',
 					reject: mockController.reject
 				});
-				backend.flush();
+				$httpBackend.flush();
 
 				expect(mockController.reject).toHaveBeenCalled();
 			});
 
 			describe('when we send data', function () {
 				it('should be retrievable on the backend. Default JSON', function () {
-					backend
+					$httpBackend
 						.expect('POST', 'api/model', JSON.stringify(mockData))
 						.respond();
 
@@ -109,14 +111,24 @@ describe('aac.api | api', function () {
 						url: 'model',
 						data: mockData
 					});
-					backend.flush();
+					$httpBackend.flush();
 				});
 
 				describe('and add a paramSerializer', function () {
+					it('should serialize it when I set the Content-Type header to \'application/x-www-form-urlencoded\'', function () {
+						$httpBackend
+							.expect('POST', 'api/model', $httpParamSerializerJQLike(mockData))
+							.respond();
 
-					it('should serialize it', function () {
-						// testing $httpParamSerializerJQLike
-						// https://docs.angularjs.org/api/ng/service/$httpParamSerializerJQLike
+						service.call({
+							method: 'POST',
+							url: 'model',
+							data: mockData,
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded'
+							}
+						});
+						$httpBackend.flush();
 					});
 				});
 			});
@@ -126,38 +138,65 @@ describe('aac.api | api', function () {
 	describe('With custom configuration.', function () {
 		describe('When we set default headers to x-www-form-urlencoded', function () {
 			beforeEach(function () {
-				module(function (apiProvider, $httpProvider) {
-					apiProvider.setConfig('debug', true);
+				module(function ($httpProvider) {
+					$httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
 				});
 
-				inject(function (api) {
+				inject(function (api, _$httpBackend_, _$httpParamSerializerJQLike_) {
 					service = api;
+					$httpBackend = _$httpBackend_;
+					$httpParamSerializerJQLike = _$httpParamSerializerJQLike_;
 				});
 			});
 
 			describe(', api.call', function () {
 				it('should send the data x-www-form-urlencoded', function () {
-					//
+					$httpBackend
+						.expect('POST', 'api/model', $httpParamSerializerJQLike(mockData))
+						.respond();
+
+					service.call({
+						method: 'POST',
+						url: 'model',
+						data: mockData
+					});
+					$httpBackend.flush();
+				});
+
+				it('should send the data like json if we overwrite the default content-type header', function () {
+					$httpBackend
+						.expect('POST', 'api/model', JSON.stringify(mockData))
+						.respond();
+
+					service.call({
+						method: 'POST',
+						url: 'model',
+						data: mockData,
+						headers: {
+							'Content-Type': 'application/json'
+						}
+					});
+					$httpBackend.flush();
 				});
 			});
 		});
 
-		describe('When we set default headers to x-www-form-urlencoded and force arrays to be JSON encoded', function () {
-			beforeEach(function () {
-				module(function (apiProvider, $httpProvider) {
-					apiProvider.setConfig('debug', true);
-				});
+		// describe('When we set default headers to x-www-form-urlencoded and force arrays to be JSON encoded', function () {
+		// 	beforeEach(function () {
+		// 		module(function (apiProvider, $httpProvider) {
+		// 			apiProvider.setConfig('debug', true);
+		// 		});
 
-				inject(function (api) {
-					service = api;
-				});
-			});
+		// 		inject(function (api) {
+		// 			service = api;
+		// 		});
+		// 	});
 
-			describe(', api.call', function () {
-				it('should send the data x-www-form-urlencoded but JSON.encode() arrays', function () {
-					//
-				});
-			});
-		});
+		// 	describe(', api.call', function () {
+		// 		it('should send the data x-www-form-urlencoded but JSON.encode() arrays', function () {
+		// 			//
+		// 		});
+		// 	});
+		// });
 	});
 });

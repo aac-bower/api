@@ -17,8 +17,8 @@
 		// $httpProvider.defaults.headers.common['Accept'] = '*/*';
   //       $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
 
-		apiProvider.setConfig('protocol', 'http://');
-		apiProvider.setConfig('baseUri', 'jsonplaceholder.typicode.com');
+		// apiProvider.setConfig('protocol', '');
+		apiProvider.setConfig('baseUri', 'http://jsonplaceholder.typicode.com');
 		apiProvider.setConfig('defaultHttpMethod', 'GET');
 		// apiProvider.setConfig('parseArrayAsJson', true);
 	}
