@@ -28,20 +28,21 @@
 			'ngInject';
 
 			var service = this;
-			service.baseUrl = config.baseUrl || (config.protocol + config.baseUri);
+			service.baseUrl = (config.baseUrl || '') || (config.protocol + config.baseUri);
 
 			/*
 				Public
 			*/
 			service.call = function (params) {
 				if (config.debug) {
-					console.log('aac.api | service.call()', params);
+					console.log('aac.api | service.call()', angular.copy(params));
 				}
 
-				return $http(extendParams(params)).then(
-					params.resolve || angular.noop,
-					params.reject || reject,
-					params.notify || notify
+				var _params = params || {};
+				return $http(extendParams(_params)).then(
+					_params.resolve || angular.noop,
+					_params.reject || reject,
+					_params.notify || notify
 				);
 			};
 
@@ -51,8 +52,12 @@
 			// extinding the params that are send in to use the defaults if they are not set
 			function extendParams(params) {
 				params.method = params.method || config.defaultHttpMethod;
-				params.url = (params.baseUrl || service.baseUrl) + params.url;
+				params.url = (params.baseUrl || service.baseUrl) + (params.url || '');
 				params.data = parse(params.data, params);
+
+				if (config.debug) {
+					console.log('aac.api | extendParams() | return', angular.copy(params));
+				}
 
 				return params;
 			}
