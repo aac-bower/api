@@ -9,6 +9,7 @@ describe('aac.api | api', function () {
 	var mockController;
 	var mockData;
 	var mockResponse;
+	var mockBackendUrl;
 
 	beforeEach(function () {
 		module('aac.api');
@@ -45,6 +46,7 @@ describe('aac.api | api', function () {
 			}),
 			statusText: ''
 		});
+		mockBackendUrl = 'http://backend.com/api';
 	});
 
 	describe('With default configuration', function () {
@@ -135,7 +137,7 @@ describe('aac.api | api', function () {
 		});
 	});
 
-	describe('With custom configuration.', function () {
+	describe('With custom $httpProvider.defaults.headers configuration.', function () {
 		describe('When we set default headers to x-www-form-urlencoded', function () {
 			beforeEach(function () {
 				module(function ($httpProvider) {
@@ -149,7 +151,7 @@ describe('aac.api | api', function () {
 				});
 			});
 
-			describe(', api.call', function () {
+			describe('| api.call() |', function () {
 				it('should send the data x-www-form-urlencoded', function () {
 					$httpBackend
 						.expect('POST', 'api/model', $httpParamSerializerJQLike(mockData))
@@ -180,23 +182,74 @@ describe('aac.api | api', function () {
 				});
 			});
 		});
-
-		// describe('When we set default headers to x-www-form-urlencoded and force arrays to be JSON encoded', function () {
-		// 	beforeEach(function () {
-		// 		module(function (apiProvider, $httpProvider) {
-		// 			apiProvider.setConfig('debug', true);
-		// 		});
-
-		// 		inject(function (api) {
-		// 			service = api;
-		// 		});
-		// 	});
-
-		// 	describe(', api.call', function () {
-		// 		it('should send the data x-www-form-urlencoded but JSON.encode() arrays', function () {
-		// 			//
-		// 		});
-		// 	});
-		// });
 	});
+
+	describe('With custom apiProvider configuration.', function () {
+		describe('When we set use apiProvider.setConfig to change the defaults', function () {
+			beforeEach(function () {
+				module(function (apiProvider) {
+					apiProvider.setConfig('debug', true);
+					apiProvider.setConfig('baseUrl', mockBackendUrl);
+					apiProvider.setConfig('defaultHttpMethod', 'POST');
+				});
+
+				inject(function (api, _$httpBackend_) {
+					service = api;
+					$httpBackend = _$httpBackend_;
+				});
+			});
+
+			describe('| api.call() |', function () {
+				it('should call console log functions when doing requests cause we enabled debug mode', function () {
+					spyOn(console, 'log');
+					service.call();
+
+					expect(console.log).toHaveBeenCalled();
+				});
+
+				describe('after setting \'baseUrl\'', function () {
+					it('should call the baseUrl we set', function () {
+						$httpBackend
+							.expect('POST', mockBackendUrl)
+							.respond();
+
+						service.call();
+						$httpBackend.flush();
+					});
+
+					it('should call the baseUrl we set. Unless we overwrite it', function () {
+						$httpBackend
+							.expect('POST', mockBackendUrl + '/extended')
+							.respond();
+
+						service.call({
+							baseUrl: mockBackendUrl + '/extended'
+						});
+						$httpBackend.flush();
+					});
+				});
+
+				describe('after setting \'defaultHttpMethod\'', function () {
+					it('should use the default method', useDefaultMethod);
+					it('should use the default method. Unless we overwrite it', overwriteDefaultMethod);
+				});
+			});
+		});
+	});
+
+	function useDefaultMethod() {
+		$httpBackend.expect('POST').respond();
+
+		service.call();
+		$httpBackend.flush();
+	}
+
+	function overwriteDefaultMethod() {
+		$httpBackend.expect('GET').respond();
+
+		service.call({
+			method: 'GET'
+		});
+		$httpBackend.flush();
+	}
 });
