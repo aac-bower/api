@@ -14,10 +14,13 @@
 	function api() {
 		'ngInject';
 
+		// DEPRECATED: config.protocol. just use baseUrl to write in both
+		// DEPRECATED: config.baseUri. just use baseUrl to write in both
 		var config = {
 			debug: false,
 			protocol: '',
 			baseUri: 'api/',
+			baseUrl: undefined,
 			defaultHttpMethod: 'GET'
 		};
 
@@ -25,7 +28,7 @@
 			'ngInject';
 
 			var service = this;
-			service.baseUrl = config.protocol + config.baseUri;
+			service.baseUrl = config.baseUrl || (config.protocol + config.baseUri);
 
 			/*
 				Public
@@ -54,20 +57,7 @@
 				return params;
 			}
 
-			// gets called when we the backend responds something else than a http response in the 2XX
-			function reject(response) {
-				if (config.debug) {
-					console.warn('UNCAUGHT REJECT @ aac.api() | service.reject() | uncaught reject', response);
-				}
-			}
-
-			// backend can call the notify function in case of file uploads to indicate progress
-			function notify(response) {
-				if (config.debug) {
-					console.log('aac.api | service.notify()', response);
-				}
-			}
-
+			// parsing the params.data
 			function parse(data, params) {
 				var _data;
 
@@ -98,6 +88,20 @@
 				}
 
 				return _data;
+			}
+
+			// gets called when we the backend responds something else than a http response in the 2XX
+			function reject(response) {
+				if (config.debug) {
+					console.warn('UNCAUGHT REJECT @ aac.api() | service.reject() | uncaught reject', response);
+				}
+			}
+
+			// backend can call the notify function in case of file uploads to indicate progress
+			function notify(response) {
+				if (config.debug) {
+					console.log('aac.api | service.notify()', response);
+				}
 			}
 
 			return service;

@@ -14,19 +14,21 @@
 	function api() {
 		'ngInject';
 
+		// DEPRECATED: config.protocol. just use baseUrl to write in both
+		// DEPRECATED: config.baseUri. just use baseUrl to write in both
 		var config = {
 			debug: false,
 			protocol: '',
 			baseUri: 'api/',
-			defaultHttpMethod: 'GET',
-			parseArrayAsJson: false
+			baseUrl: undefined,
+			defaultHttpMethod: 'GET'
 		};
 
-		var serviceConstruct = function ($http) {
+		var serviceConstruct = function ($http, $httpParamSerializerJQLike) {
 			'ngInject';
 
 			var service = this;
-			service.baseUrl = config.protocol + config.baseUri;
+			service.baseUrl = config.baseUrl || (config.protocol + config.baseUri);
 
 			/*
 				Public
@@ -36,13 +38,7 @@
 					console.log('aac.api | service.call()', params);
 				}
 
-				var _method = params.method || config.defaultHttpMethod;
-
-				return $http({
-					method: _method,
-					url: (params.baseUrl || service.baseUrl) + (params.url || ''),
-					data: parse(params.data, _method)
-				}).then(
+				return $http(extendParams(params)).then(
 					params.resolve || angular.noop,
 					params.reject || reject,
 					params.notify || notify
@@ -52,68 +48,60 @@
 			/*
 				Private
 			*/
-			function reject(response) {
-				if (config.debug) {
-					console.log('aac.api | service.reject()', response);
-				}
+			// extinding the params that are send in to use the defaults if they are not set
+			function extendParams(params) {
+				params.method = params.method || config.defaultHttpMethod;
+				params.url = (params.baseUrl || service.baseUrl) + params.url;
+				params.data = parse(params.data, params);
+
+				return params;
 			}
 
-			function notify(response) {
-				if (config.debug) {
-					console.log('aac.api | service.notify()', response);
-				}
-			}
-
-			function parse(data, method) {
+			// parsing the params.data
+			function parse(data, params) {
 				var _data;
 
-				// checks or we have set a content type header for the current method
+				// we should serialize params.data in the folowing cases:
 				if (
-					$http.defaults.headers[method.toLowerCase()] &&
-					$http.defaults.headers[method.toLowerCase()]['Content-Type'].match('application/x-www-form-urlencoded')
+					(
+						// if we have params.headers set to overwrite the default and the over writing results in a header set to 'Content-Type': 'application/x-www-form-urlencoded'
+						params.headers &&
+						params.headers['Content-Type'].match('application/x-www-form-urlencoded')
+					) || (
+						// or we have default headers for this method set to 'Content-Type': 'application/x-www-form-urlencoded'
+						$http.defaults.headers[params.method.toLowerCase()] &&
+						$http.defaults.headers[params.method.toLowerCase()]['Content-Type'].match('application/x-www-form-urlencoded') &&
+						// and we did not pass headers in to params that can overwrite that setting
+						(
+							!params.headers ||
+							(
+								params.headers &&
+								!params.headers['Content-Type']
+							)
+						)
+					)
 				) {
-					_data = formUrlEncode(data);
+					_data = $httpParamSerializerJQLike(data);
 				} else {
+					// if we don't serialize we will make it valid JSON
 					_data = JSON.stringify(data);
 				}
 
 				return _data;
 			}
 
-			function formUrlEncode(obj) {
-				var query = '', name, value, fullSubName, subName, subValue, innerObj, i;
-
-				for (name in obj) {
-					value = obj[name];
-
-					if (value instanceof Array) {
-						if (config.parseArrayAsJson) {
-							var urlComponent = {};
-							urlComponent[name] = JSON.stringify(value);
-							query += formUrlEncode(urlComponent) + '&';
-						} else {
-							for (i = value.length-1; i >= 0; i--) {
-								subValue = value[i];
-								fullSubName = name + '[' + i + ']';
-								innerObj = {};
-								innerObj[fullSubName] = subValue;
-								query += formUrlEncode(innerObj) + '&';
-							}
-						}
-					} else if (value instanceof Object) {
-						for (subName in value) {
-							subValue = value[subName];
-							fullSubName = name + '[' + subName + ']';
-							innerObj = {};
-							innerObj[fullSubName] = subValue;
-							query += formUrlEncode(innerObj) + '&';
-						}
-					} else if (value !== undefined && value !== null) {
-						query += encodeURIComponent(name) + '=' + encodeURIComponent(value) + '&';
-					}
+			// gets called when we the backend responds something else than a http response in the 2XX
+			function reject(response) {
+				if (config.debug) {
+					console.warn('UNCAUGHT REJECT @ aac.api() | service.reject() | uncaught reject', response);
 				}
+			}
 
-				return query.length ? query.substr(0, query.length - 1) : query;
+			// backend can call the notify function in case of file uploads to indicate progress
+			function notify(response) {
+				if (config.debug) {
+					console.log('aac.api | service.notify()', response);
+				}
 			}
 
 			return service;
